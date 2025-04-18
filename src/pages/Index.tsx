@@ -1,14 +1,15 @@
 
 import AuthForm from "@/components/auth/AuthForm";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const isAuthenticated = false; // This will be replaced with actual auth state
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8 px-4">
-        {isAuthenticated ? <DashboardLayout /> : <AuthForm />}
+        {user ? <DashboardLayout /> : <AuthForm />}
       </div>
     </div>
   );
