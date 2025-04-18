@@ -1,7 +1,7 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { Database } from '@/integrations/supabase/types';
 
 interface AuthContextType {
   user: User | null;
@@ -42,8 +42,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, referralCode?: string) => {
-    const newReferralCode = generateReferralCode();
-    
     const { data: { user }, error } = await supabase.auth.signUp({
       email,
       password,
@@ -51,40 +49,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (error) throw error;
 
-    if (user) {
-      // Create user profile with referral code
-      await supabase.from('users').insert([
-        {
-          id: user.id,
-          email: user.email,
-          referral_code: newReferralCode,
-          points: referralCode ? 5 : 0 // 5 points if signed up with referral
-        }
-      ]);
+    if (user && referralCode) {
+      const { data: referrer } = await supabase
+        .from('users')
+        .select('points, id')
+        .eq('referral_code', referralCode)
+        .single();
 
-      // If user signed up with a referral code, add points to referrer
-      if (referralCode) {
-        // Fixed line: Using proper async/await pattern with Supabase queries
-        const { data: referrer } = await supabase
+      if (referrer) {
+        // Update referrer's points
+        await supabase
           .from('users')
-          .select('points')
-          .eq('referral_code', referralCode)
-          .single();
+          .update({ points: (referrer.points || 0) + 10 })
+          .eq('id', referrer.id);
 
-        if (referrer) {
-          await supabase
-            .from('users')
-            .update({ points: referrer.points + 10 })
-            .eq('referral_code', referralCode);
+        // Add points to the new user
+        await supabase
+          .from('users')
+          .update({ points: 5 })
+          .eq('id', user.id);
 
-          // Record the referral
-          await supabase.from('referrals').insert([
+        // Record the referral
+        await supabase
+          .from('referrals')
+          .insert([
             {
-              referrer_code: referralCode,
-              referred_user_id: user.id
+              referrer_id: referrer.id,
+              referred_id: user.id
             }
           ]);
-        }
       }
     }
   };

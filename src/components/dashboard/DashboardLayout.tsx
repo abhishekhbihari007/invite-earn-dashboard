@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -131,6 +130,11 @@ const DashboardLayout = () => {
             <p className="text-3xl font-bold">{stats.rewards_redeemed}</p>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Available Rewards</h2>
+        <RewardsList />
       </div>
     </div>
   );
