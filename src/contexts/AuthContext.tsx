@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // If user signed up with a referral code, add points to referrer
       if (referralCode) {
+        // Fixed line: Using proper async/await pattern with Supabase queries
         const { data: referrer } = await supabase
           .from('users')
           .select('points')
