@@ -5,24 +5,27 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { Copy, LogOut, Users, Gift, Trophy } from "lucide-react";
+
+interface UserStats {
+  points: number;
+  referral_code: string;
+  referrals_made: number;
+  rewards_redeemed: number;
+}
 
 const DashboardLayout = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const [userData, setUserData] = useState<{
-    points: number;
-    referral_code: string;
-    rewards_redeemed: number;
-    referrals_made: number;
-  }>({
+  const [stats, setStats] = useState<UserStats>({
     points: 0,
     referral_code: "",
-    rewards_redeemed: 0,
     referrals_made: 0,
+    rewards_redeemed: 0,
   });
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserStats = async () => {
       if (!user) return;
 
       const { data, error } = await supabase
@@ -41,31 +44,40 @@ const DashboardLayout = () => {
       }
 
       if (data) {
-        setUserData({
+        setStats({
           points: data.points || 0,
           referral_code: data.referral_code || "",
-          rewards_redeemed: data.rewards_redeemed || 0,
           referrals_made: data.referrals_made || 0,
+          rewards_redeemed: data.rewards_redeemed || 0,
         });
       }
     };
 
-    fetchUserData();
+    fetchUserStats();
   }, [user]);
 
   const copyReferralCode = () => {
-    navigator.clipboard.writeText(userData.referral_code);
+    navigator.clipboard.writeText(stats.referral_code);
     toast({
       title: "Copied!",
       description: "Referral code copied to clipboard",
     });
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully",
+    });
+  };
+
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Welcome to Your Dashboard</h1>
-        <Button variant="outline" onClick={() => signOut()}>
+        <h1 className="text-3xl font-bold">Welcome!</h1>
+        <Button variant="outline" onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
           Sign Out
         </Button>
       </div>
@@ -75,38 +87,48 @@ const DashboardLayout = () => {
           <CardTitle>Your Referral Code</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-between">
-          <p className="text-3xl font-bold">{userData.referral_code}</p>
+          <p className="text-3xl font-bold">{stats.referral_code}</p>
           <Button variant="secondary" onClick={copyReferralCode}>
+            <Copy className="mr-2 h-4 w-4" />
             Copy Code
           </Button>
         </CardContent>
       </Card>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Total Points</CardTitle>
+            <CardTitle className="flex items-center">
+              <Trophy className="mr-2 h-5 w-5" />
+              Points
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{userData.points}</p>
+            <p className="text-3xl font-bold">{stats.points}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Referrals Made</CardTitle>
+            <CardTitle className="flex items-center">
+              <Users className="mr-2 h-5 w-5" />
+              Referrals
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{userData.referrals_made}</p>
+            <p className="text-3xl font-bold">{stats.referrals_made}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Rewards Redeemed</CardTitle>
+            <CardTitle className="flex items-center">
+              <Gift className="mr-2 h-5 w-5" />
+              Rewards Redeemed
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{userData.rewards_redeemed}</p>
+            <p className="text-3xl font-bold">{stats.rewards_redeemed}</p>
           </CardContent>
         </Card>
       </div>

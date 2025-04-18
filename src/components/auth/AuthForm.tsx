@@ -20,13 +20,17 @@ const AuthForm = () => {
     try {
       if (isLogin) {
         await signIn(email, password);
+        toast({
+          title: "Welcome back!",
+          description: "Successfully logged in.",
+        });
       } else {
         await signUp(email, password, referralCode);
+        toast({
+          title: "Welcome!",
+          description: "Account created successfully.",
+        });
       }
-      toast({
-        title: isLogin ? "Welcome back!" : "Account created successfully!",
-        description: isLogin ? "You've been logged in." : "You can now start earning points!",
-      });
     } catch (error) {
       toast({
         title: "Error",
