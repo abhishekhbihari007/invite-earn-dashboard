@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, LogOut, Users, Gift, Trophy } from "lucide-react";
+import { RewardsList } from "@/components/rewards/RewardsList";
 
 interface UserStats {
   points: number;
